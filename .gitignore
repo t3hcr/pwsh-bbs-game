@@ -1,0 +1,14 @@
+# PowerShell
+*.user
+*.suo
+*.cache
+
+# VS Code
+.vscode/
+
+# Saves
+saves/
+
+# OS
+.DS_Store
+Thumbs.db
