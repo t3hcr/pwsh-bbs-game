@@ -1,6 +1,47 @@
+<#
+.SYNOPSIS
+Console input/output helpers for BBS Tycoon.
+
+.DESCRIPTION
+Defines small helper functions used by the game to read user input and write
+styled output. This file is intended to be dot-sourced by the entry script.
+
+.EXAMPLE
+. (Join-Path $PSScriptRoot 'Console.ps1')
+Set-BbsConsoleTheme
+Write-BbsLine "Welcome" -Tone Accent
+
+.NOTES
+These helpers write to the host (interactive console), not to the pipeline.
+#>
+
 Set-StrictMode -Version Latest
 
 function Set-BbsConsoleTheme {
+    <#
+    .SYNOPSIS
+    Configures the color theme used by other console helpers.
+
+    .DESCRIPTION
+    Sets a script-scoped `$script:BbsTheme` hashtable used by `Write-BbsLine`.
+    Use `-NoColor` to disable colors entirely.
+
+    .PARAMETER NoColor
+    Disables theme colors (output is written without `-ForegroundColor`).
+
+    .EXAMPLE
+    Set-BbsConsoleTheme
+
+    Enables the default color theme.
+
+    .EXAMPLE
+    Set-BbsConsoleTheme -NoColor
+
+    Disables colored output.
+
+    .OUTPUTS
+    None.
+    #>
     [CmdletBinding()]
     param([switch]$NoColor)
 
@@ -13,6 +54,34 @@ function Set-BbsConsoleTheme {
 }
 
 function Write-BbsLine {
+    <#
+    .SYNOPSIS
+    Writes a single line of text to the console.
+
+    .DESCRIPTION
+    Writes the provided text to the host. If a theme color is configured and the
+    supplied tone maps to a color, the text is written using `-ForegroundColor`.
+
+    .PARAMETER Text
+    The text to display. May be an empty string.
+
+    .PARAMETER Tone
+    A semantic tone that maps to a theme color. Valid values are: Accent, Good,
+    Warn, Bad, Dim, None.
+
+    .EXAMPLE
+    Write-BbsLine "Saved." -Tone Good
+
+    Writes a success message in the configured theme.
+
+    .EXAMPLE
+    Write-BbsLine "" 
+
+    Writes a blank line.
+
+    .OUTPUTS
+    None.
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][AllowEmptyString()][string]$Text,
@@ -27,6 +96,32 @@ function Write-BbsLine {
 }
 
 function Read-BbsChoice {
+    <#
+    .SYNOPSIS
+    Prompts the user to choose a value from a fixed list.
+
+    .DESCRIPTION
+    Prompts using `Read-Host` until the user enters a value that is present in
+    `-Options`. If the user presses Enter with no input, `-Default` is returned
+    when it is present in `-Options`.
+
+    .PARAMETER Prompt
+    Prompt text displayed to the user.
+
+    .PARAMETER Options
+    The allowed choices.
+
+    .PARAMETER Default
+    Optional default choice used when the user provides no input.
+
+    .EXAMPLE
+    Read-BbsChoice -Prompt "Choose" -Options @('1','2','Q') -Default '1'
+
+    Returns one of the allowed values.
+
+    .OUTPUTS
+    System.String.
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][string]$Prompt,
@@ -52,6 +147,31 @@ function Read-BbsChoice {
 }
 
 function Read-BbsInt {
+    <#
+    .SYNOPSIS
+    Prompts the user for an integer within a range.
+
+    .DESCRIPTION
+    Prompts using `Read-Host` until the input parses as an integer and falls
+    within the inclusive bounds of `-Min` and `-Max`.
+
+    .PARAMETER Prompt
+    Prompt text displayed to the user.
+
+    .PARAMETER Min
+    Minimum allowed value (inclusive).
+
+    .PARAMETER Max
+    Maximum allowed value (inclusive).
+
+    .EXAMPLE
+    Read-BbsInt -Prompt "How many lines?" -Min 1 -Max 8
+
+    Returns a validated integer.
+
+    .OUTPUTS
+    System.Int32.
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][string]$Prompt,

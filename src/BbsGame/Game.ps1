@@ -1,6 +1,44 @@
+<#
+.SYNOPSIS
+Main game loop and UI flow for BBS Tycoon.
+
+.DESCRIPTION
+Defines the main game entry function (`Start-BbsGame`) and supporting UI helpers
+for showing status and applying upgrades.
+
+This file is intended to be dot-sourced by the entry script.
+
+.EXAMPLE
+. (Join-Path $PSScriptRoot 'Game.ps1')
+Start-BbsGame -SavePath ./saves/save.json
+
+.OUTPUTS
+This script defines functions; it does not output anything when dot-sourced.
+#>
+
 Set-StrictMode -Version Latest
 
 function Show-BbsStatus {
+    <#
+    .SYNOPSIS
+    Writes a one-screen status summary to the console.
+
+    .DESCRIPTION
+    Computes derived stats and prints a summary of the current BBS state:
+    users, cash, upgrades, and the last random event (if present).
+
+    .PARAMETER State
+    The current game state.
+
+    .PARAMETER Catalog
+    The game catalog returned by `Get-BbsCatalog`.
+
+    .EXAMPLE
+    Show-BbsStatus -State $state -Catalog $catalog
+
+    .OUTPUTS
+    None.
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][pscustomobject]$State,
@@ -26,6 +64,27 @@ function Show-BbsStatus {
 }
 
 function Show-BbsUpgrades {
+    <#
+    .SYNOPSIS
+    Shows the upgrades menu and applies the selected upgrade.
+
+    .DESCRIPTION
+    Displays the upgrades menu and prompts for a choice. If the player selects an
+    upgrade they can afford, the function mutates the game state (cash and BBS
+    configuration). This function does not save automatically.
+
+    .PARAMETER State
+    The current game state to mutate.
+
+    .PARAMETER Catalog
+    The game catalog returned by `Get-BbsCatalog`.
+
+    .EXAMPLE
+    Show-BbsUpgrades -State $state -Catalog $catalog
+
+    .OUTPUTS
+    None.
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][pscustomobject]$State,
@@ -185,6 +244,40 @@ function Show-BbsUpgrades {
 }
 
 function Start-BbsGame {
+    <#
+    .SYNOPSIS
+    Starts the BBS Tycoon game.
+
+    .DESCRIPTION
+    Loads an existing save (unless `-NewGame` is specified) or creates a new one,
+    then runs either:
+    - Interactive mode (menu-driven loop), when `-SimDays` is 0
+    - Scriptable simulation mode, when `-SimDays` is > 0
+
+    In scriptable mode, the game advances `-SimDays` days, saves, prints a short
+    summary, and returns.
+
+    .PARAMETER SavePath
+    Path to the JSON save file.
+
+    .PARAMETER SimDays
+    If greater than 0, advances the simulation for that many days and exits.
+
+    .PARAMETER NewGame
+    Forces creating a new game state instead of loading an existing save.
+
+    .PARAMETER NewGameName
+    Name to use when creating a new game.
+
+    .EXAMPLE
+    Start-BbsGame -SavePath ./saves/save.json
+
+    .EXAMPLE
+    Start-BbsGame -SavePath ./saves/sim.json -NewGame -NewGameName 'Test Board' -SimDays 10
+
+    .OUTPUTS
+    None.
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][string]$SavePath,

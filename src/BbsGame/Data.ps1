@@ -1,6 +1,46 @@
+<#
+.SYNOPSIS
+Game data catalog for BBS Tycoon.
+
+.DESCRIPTION
+Defines the catalog of upgrade tiers and pricing options used by the game
+(software tiers, hardware tiers, networks, connectivity, door games, etc.).
+
+This file is intended to be dot-sourced by the entry script.
+
+.EXAMPLE
+. (Join-Path $PSScriptRoot 'Data.ps1')
+$catalog = Get-BbsCatalog
+$catalog.SoftwareTiers | Select-Object Name, MaxUsers
+
+.OUTPUTS
+This script defines functions; it does not output anything when dot-sourced.
+#>
+
 Set-StrictMode -Version Latest
 
 function Get-BbsCatalog {
+    <#
+    .SYNOPSIS
+    Gets the game catalog describing available tiers and pricing.
+
+    .DESCRIPTION
+    Returns a `[pscustomobject]` containing lists of available upgrades and
+    related constants used by simulation and UI.
+
+    Values are intentionally simplified and "inspired by" the era rather than
+    strictly historical.
+
+    .EXAMPLE
+    $catalog = Get-BbsCatalog
+    $catalog.CpuTiers | Select-Object Id, Name, Cost
+
+    .EXAMPLE
+    (Get-BbsCatalog).Pricing.Paid.MemberMonthlyFee
+
+    .OUTPUTS
+    System.Management.Automation.PSCustomObject.
+    #>
     [CmdletBinding()]
     param()
 

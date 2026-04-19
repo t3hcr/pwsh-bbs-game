@@ -1,6 +1,45 @@
+<#
+.SYNOPSIS
+Simulation and random events for BBS Tycoon.
+
+.DESCRIPTION
+Defines the day-to-day simulation step (income/expenses, churn/attract, time
+advance) and a small weighted random event system that adds flavor and minor
+mechanical changes.
+
+This file is intended to be dot-sourced by the entry script.
+
+.EXAMPLE
+. (Join-Path $PSScriptRoot 'Simulation.ps1')
+$catalog = Get-BbsCatalog
+$state = New-BbsState -BbsName 'Test' -Catalog $catalog
+Step-BbsOneDay -State $state -Catalog $catalog | Out-Null
+
+.OUTPUTS
+This script defines functions; it does not output anything when dot-sourced.
+#>
+
 Set-StrictMode -Version Latest
 
 function Get-BbsWeightedChoiceIndex {
+    <#
+    .SYNOPSIS
+    Picks an index from a list of weights.
+
+    .DESCRIPTION
+    Interprets `-Weights` as relative weights for each index and uses `Get-Random`
+    to choose an index proportionally. Non-positive weights are treated as zero.
+    Returns -1 when the total weight is <= 0.
+
+    .PARAMETER Weights
+    A list of weights corresponding to each choice.
+
+    .EXAMPLE
+    Get-BbsWeightedChoiceIndex -Weights @(0.7, 0.2, 0.1)
+
+    .OUTPUTS
+    System.Int32.
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][double[]]$Weights
@@ -25,6 +64,37 @@ function Get-BbsWeightedChoiceIndex {
 }
 
 function Invoke-BbsRandomEvent {
+    <#
+    .SYNOPSIS
+    Applies a weighted random flavor event to the current state.
+
+    .DESCRIPTION
+    Chooses a weighted event based on the current configuration and conditions
+    (busy rate, installed doors, networks, connectivity, etc.) and mutates the
+    state accordingly.
+
+    The function ensures the state has a `_LastEvent` property (creating it if
+    missing) and sets it to the most recent event description or `$null`.
+
+    .PARAMETER State
+    The current game state to mutate.
+
+    .PARAMETER Catalog
+    The game catalog returned by `Get-BbsCatalog`.
+
+    .PARAMETER Derived
+    The derived stats object returned by `Get-BbsDerivedStats`.
+
+    .PARAMETER BusyRate
+    Approximate fraction of call attempts that hit a busy signal (0.0 to 1.0).
+
+    .EXAMPLE
+    $derived = Get-BbsDerivedStats -State $state -Catalog $catalog
+    Invoke-BbsRandomEvent -State $state -Catalog $catalog -Derived $derived -BusyRate 0.2
+
+    .OUTPUTS
+    None.
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][pscustomobject]$State,
@@ -193,6 +263,31 @@ function Invoke-BbsRandomEvent {
 }
 
 function Step-BbsOneDay {
+    <#
+    .SYNOPSIS
+    Advances the simulation by one in-game day.
+
+    .DESCRIPTION
+    Updates the state in place for one simulated day:
+    - Computes busy rate and demand (attract/churn)
+    - Updates user count (bounded by capacity)
+    - Calculates daily income and expenses
+    - Applies a random event
+    - Updates cash and reputation
+    - Advances time by 24 hours
+
+    .PARAMETER State
+    The current game state to mutate.
+
+    .PARAMETER Catalog
+    The game catalog returned by `Get-BbsCatalog`.
+
+    .EXAMPLE
+    $state = Step-BbsOneDay -State $state -Catalog $catalog
+
+    .OUTPUTS
+    System.Management.Automation.PSCustomObject.
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][pscustomobject]$State,

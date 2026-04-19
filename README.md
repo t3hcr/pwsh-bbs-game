@@ -21,19 +21,37 @@ This game is *inspired by* that era, but it uses simplified numbers so it stays 
 From the repo root:
 
 ```powershell
-pwsh ./bbs-game.ps1
+pwsh ./bbs-game-run.ps1
 ```
 
 Optional:
 
 ```powershell
-pwsh ./bbs-game.ps1 -SavePath ./saves/my-save.json
-pwsh ./bbs-game.ps1 -NoColor
+pwsh ./bbs-game-run.ps1 -SavePath ./saves/my-save.json
+pwsh ./bbs-game-run.ps1 -NoColor
+
+# Scriptable simulation (no prompts): advance N days then exit
+pwsh ./bbs-game-run.ps1 -NewGame -NewGameName "The Rusty Modem" -SimDays 30 -SavePath ./saves/sim.json
 ```
+
+## Parameters
+
+- `-SavePath` (default: `./saves/save.json`)
+	- Path to a JSON save file. Relative paths are interpreted from the current working directory.
+- `-NoColor`
+	- Disables colored output.
+- `-SimDays <int>`
+	- Runs the simulation for N days without prompts, saves, prints a short summary, and exits.
+- `-NewGame`
+	- Starts a new game even if the save file already exists.
+- `-NewGameName <string>`
+	- Name for a new game (otherwise it prompts in interactive mode, or falls back to a default in scripted mode).
 
 ## Save files
 
 Saves are JSON files stored under `./saves/` by default.
+
+If the game crashes, it writes a best-effort crash log to `./saves/last-crash.txt`.
 
 ## Roadmap ideas (if you want them next)
 

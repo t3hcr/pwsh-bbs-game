@@ -1,4 +1,49 @@
 #!/usr/bin/env pwsh
+<#
+.SYNOPSIS
+Runs the BBS Tycoon console game.
+
+.DESCRIPTION
+Starts an interactive single-player console game about running a dial-up era BBS.
+
+The script dot-sources supporting scripts under `src/BbsGame/*.ps1`, then calls
+`Start-BbsGame`.
+
+If the game encounters an unhandled error, it writes a best-effort crash log to
+`./saves/last-crash.txt` and exits with code 1.
+
+.PARAMETER NoColor
+Disables colored console output.
+
+.PARAMETER SavePath
+Path to a JSON save file. Relative paths are interpreted from the current working
+directory. Default is `./saves/save.json`.
+
+.PARAMETER SimDays
+Runs the simulation for the specified number of in-game days without prompting,
+saves, prints a short summary, and exits.
+
+.PARAMETER NewGame
+Starts a new game even if `-SavePath` already exists.
+
+.PARAMETER NewGameName
+Name to use for a new game. If not provided, the script prompts (interactive
+mode) or uses a default.
+
+.EXAMPLE
+pwsh ./bbs-game-run.ps1
+
+Starts the game interactively using the default save path.
+
+.EXAMPLE
+pwsh ./bbs-game-run.ps1 -NewGame -NewGameName "The Rusty Modem" -SimDays 30 -SavePath ./saves/test.json
+
+Creates a new game, advances 30 days without prompts, then saves to the specified
+path.
+
+.NOTES
+Requires PowerShell 7+.
+#>
 [CmdletBinding()]
 param(
     [Parameter()][switch]$NoColor,

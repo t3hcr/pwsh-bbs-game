@@ -1,6 +1,50 @@
+<#
+.SYNOPSIS
+Game state model and derived stats for BBS Tycoon.
+
+.DESCRIPTION
+Defines functions to create a new game state and to compute derived statistics
+(capacity, quality, reach, pricing selection) used by the simulation and UI.
+
+This file is intended to be dot-sourced by the entry script.
+
+.EXAMPLE
+. (Join-Path $PSScriptRoot 'Model.ps1')
+$state = New-BbsState -BbsName 'The Rusty Modem'
+$catalog = Get-BbsCatalog
+$derived = Get-BbsDerivedStats -State $state -Catalog $catalog
+$derived.UserCap
+
+.OUTPUTS
+This script defines functions; it does not output anything when dot-sourced.
+#>
+
 Set-StrictMode -Version Latest
 
 function New-BbsState {
+    <#
+    .SYNOPSIS
+    Creates a new default game state.
+
+    .DESCRIPTION
+    Creates and returns a `[pscustomobject]` representing the current game state,
+    including the current time, BBS configuration, finances, and flags.
+
+    If `-Catalog` is not provided, the function calls `Get-BbsCatalog`.
+
+    .PARAMETER BbsName
+    The display name of the BBS.
+
+    .PARAMETER Catalog
+    The game catalog returned by `Get-BbsCatalog`. If omitted, the catalog is
+    retrieved automatically.
+
+    .EXAMPLE
+    $state = New-BbsState -BbsName 'The Rusty Modem'
+
+    .OUTPUTS
+    System.Management.Automation.PSCustomObject.
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][string]$BbsName,
@@ -52,6 +96,31 @@ function New-BbsState {
 }
 
 function Get-BbsDerivedStats {
+    <#
+    .SYNOPSIS
+    Computes derived statistics from the current state.
+
+    .DESCRIPTION
+    Looks up the selected upgrade tiers from the catalog and calculates
+    derived values used by simulation and UI, including:
+    - Capacity: `ConcurrentCap` (phone lines) and `UserCap`
+    - Composite quality and reach values
+    - A simplified `HardwareFactor`
+
+    .PARAMETER State
+    The current game state object.
+
+    .PARAMETER Catalog
+    The catalog object returned by `Get-BbsCatalog`.
+
+    .EXAMPLE
+    $catalog = Get-BbsCatalog
+    $state = New-BbsState -BbsName 'Test' -Catalog $catalog
+    Get-BbsDerivedStats -State $state -Catalog $catalog | Select-Object UserCap, Reach, Quality
+
+    .OUTPUTS
+    System.Management.Automation.PSCustomObject.
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][pscustomobject]$State,
